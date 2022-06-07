@@ -1,0 +1,4 @@
+{
+    "epochs":{"_type":"choice","_value":[10,20]},
+    "lr":{"_type":"quniform","_value":[0.0005,0.0025,0.0005]}
+}

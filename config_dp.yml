@@ -1,0 +1,25 @@
+### nnictl create --config config_dp.yml -p 8240
+experimentName: RES-NNI-train-minist
+
+searchSpaceFile: search_space.json
+trialCommand: python nni_minist.py
+trialCodeDirectory: . # 指定python代码路径
+experimentWorkingDirectory: ./RES_NNI_LOG # 日志
+
+trialConcurrency: 2 #trail的并发数,根据GPU数量设置，此值为几就有几个train在同时跑
+trainingService:
+  platform: local
+  gpuIndices: [0,1,6,7] # 使用哪几个GPU
+  useActiveGpu: True # 默认值false。是否使用已经被其他进程使用的gpu,包括graphical desktop占用的。
+  maxTrialNumberPerGpu: 1 #指定1个GPU上最大并发trail的数量,在确保显存达到足以容下任何两个trail时，再设置为2。
+trialGpuNumber: 2 # 每个trail所需要的gpu个数
+    
+maxExperimentDuration: 24h
+maxTrialNumber: 100
+
+tuner:
+  #choice: GridSearch, Random, Evolution, BatchTuner, Anneal, TPE, MetisTuner, GPTuner
+  name: GridSearch
+  # classArgs:
+  #   optimize_mode: maximize
+
