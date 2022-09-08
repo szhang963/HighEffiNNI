@@ -1,6 +1,6 @@
 # HighPerfNNI
 
-This repository is a high-performance training framework with NNI for PyTorch. 
+This repository is a high-efficiency training framework with NNI for PyTorch. 
 
 ## Requirements
 
@@ -9,7 +9,11 @@ To install requirements:
 ```setup
 PyTorch >= 1.6
 nni >= 2.8
+easydict >= 1.9
 ```
+## config.yml
+A example of `config.yml` can be found in this repo.
+More experiment config references can see [here](https://nni.readthedocs.io/en/stable/reference/experiment_config.html).
 
 ## Running
 
