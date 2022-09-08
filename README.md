@@ -1,6 +1,6 @@
 # HighEffiNNI
 
-This repository is a high-efficiency training framework with NNI for PyTorch. 
+This repository is a high-efficiency training framework with [NNI](https://github.com/microsoft/nni) for PyTorch. 
 
 ## Requirements
 
