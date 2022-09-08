@@ -35,3 +35,7 @@ To stop the nni, run this command:
 ```
 nnictl stop [--all] ([id])
 ```
+
+TODO:
+- [ ] To integrate the distributed training framework horovod into NNI.
+- [ ] To develop more efficient training skills.
