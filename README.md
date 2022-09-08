@@ -1,4 +1,4 @@
-# HighPerfNNI
+# HighEffiNNI
 
 This repository is a high-efficiency training framework with NNI for PyTorch. 
 
