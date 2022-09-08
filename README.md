@@ -8,7 +8,7 @@ To install requirements:
 
 ```setup
 PyTorch >= 1.6
-nni >= 2.7
+nni >= 2.8
 ```
 
 ## Running
