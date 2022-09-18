@@ -17,6 +17,7 @@ from nets.simpleNet import Net
 
 import nni
 from nni.utils import merge_parameter
+from easydict import EasyDict
 
 # Training settings
 parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
@@ -43,16 +44,15 @@ parser.add_argument('--data_dir', type=str, default='./data',
 
 
 def main(args):
-    save_threshold = 0.8
-    seed = args['seed']
+    seed = args.seed
     set_random_seed(seed)
     logging.info(f'set random seed: {seed}')
-    if (args['use_mixed_precision'] and LooseVersion(torch.__version__)
+    if (args.use_mixed_precision and LooseVersion(torch.__version__)
             < LooseVersion('1.6.0')):
         raise ValueError("""Mixed precision is using torch.cuda.amp.autocast(),
                             which requires torch >= 1.6.0""")
 
-    data_dir = args['data_dir']
+    data_dir = args.data_dir
     train_dataset = \
         datasets.MNIST(data_dir, train=True, download=True,
                         transform=transforms.Compose([
@@ -64,7 +64,7 @@ def main(args):
         set_random_seed(seed + worker_id)
 
     train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=args['batch_size'], shuffle=True, num_workers=16, pin_memory=True, drop_last=True, worker_init_fn=worker_init_fn)
+        train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=16, pin_memory=True, drop_last=True, worker_init_fn=worker_init_fn)
 
     test_dataset = \
         datasets.MNIST(data_dir, train=False, transform=transforms.Compose([
@@ -72,47 +72,50 @@ def main(args):
             transforms.Normalize((0.1307,), (0.3081,))
         ]))
 
-    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=args['test_batch_size'], shuffle=False, num_workers=16, pin_memory=True)
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=args.test_batch_size, shuffle=False, num_workers=16, pin_memory=True)
 
     model = Net()
     # model = nn.DataParallel(model)
     # Move model to GPU.
-    model.to(device=args['device'])
+    model.to(device=args.device)
 
-    optimizer = optim.SGD(model.parameters(), lr=args['lr'], momentum=args['momentum'])
+    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
 
-    if args['use_mixed_precision']:
+    if args.use_mixed_precision:
         # Initialize scaler in global scale
         scaler = torch.cuda.amp.GradScaler()
 
-    for epoch in range(1, args['epochs'] + 1):
-        if args['use_mixed_precision']:
+    for epoch in range(1, args.epochs + 1):
+        if args.use_mixed_precision:
             train_mixed_precision(epoch, scaler, model, optimizer, train_loader, train_dataset)
         else:
             train_epoch(epoch, model, optimizer, train_loader, train_dataset)
         # Keep test in full precision since computation is relatively light.
         test_acc = test(model, test_loader, test_dataset)
-    
-    metrics_final = {
-        "default":test_acc,
-        # "dice_2D":valid_dice_mean,
-    }
-    nni.report_final_result(metrics_final)
 
-    if test_acc < save_threshold:
-        logging.info('Train Finish!') 
-    else:
-        experiment_id = args['experiment_id']
-        base_dir = args['base_dir']
-        base_dir = base_dir + '-' + experiment_id + '/res-'
-        base_dir = base_dir + 'Epochs_{}-LR_{}-{:.4f}'.format(args['epochs'],args['lr'],test_acc)
-        if not os.path.exists(base_dir):
-            os.makedirs(base_dir)
-        backup_code(base_dir)
+    if NNI_FLAG == True:
+        ######## collect the final result for NNI ########
+        metrics_final = {
+            "default":test_acc,
+            # "dice_2D":valid_dice_mean,
+        }
+        nni.report_final_result(metrics_final)
 
-        trial_id = args['trial_id']
-        trial_log_path = os.path.join('RES_NNI_LOG',experiment_id,'trials',trial_id,'trial.log')
-        shutil.copy(trial_log_path, base_dir + '/' + 'trial.log')
+        if test_acc < args.save_threshold:
+            logging.info('Train Finish!') 
+        else:
+            experiment_id = args.experiment_id
+            base_dir = args.base_dir
+            base_dir = base_dir + '-' + experiment_id + '/res-'
+            base_dir = base_dir + 'Epochs_{}-LR_{}-{:.4f}'.format(args.epochs, args.lr, test_acc)
+            if not os.path.exists(base_dir):
+                os.makedirs(base_dir)
+            backup_code(base_dir)
+
+            trial_id = args.trial_id
+            trial_log_path = os.path.join('RES_NNI_LOG',experiment_id,'trials',trial_id,'trial.log')
+            shutil.copy(trial_log_path, base_dir + '/' + 'trial.log')
+        ######## collect the final result for NNI ########
 
 def train_mixed_precision(epoch, scaler, model, optimizer, train_loader, train_dataset):
     model.train()
@@ -127,7 +130,7 @@ def train_mixed_precision(epoch, scaler, model, optimizer, train_loader, train_d
         scaler.step(optimizer)
         scaler.update()
 
-        if batch_idx % args['log_interval'] == 0:
+        if batch_idx % args.log_interval == 0:
             logging.info('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tLoss Scale: {}'.format(
                 epoch, batch_idx * len(data), len(train_dataset),
                         100. * batch_idx / len(train_loader), loss.item(), scaler.get_scale()))
@@ -141,7 +144,7 @@ def train_epoch(epoch, model, optimizer, train_loader, train_dataset):
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
-        if batch_idx % args['log_interval'] == 0:
+        if batch_idx % args.log_interval == 0:
             logging.info('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_dataset),
                         100. * batch_idx / len(train_loader), loss.item()))
@@ -165,11 +168,14 @@ def test(model, test_loader, test_dataset):
     logging.info('\nTest set: Average loss: {:.4f}, Accuracy: {:.2f}%\n'.format(
         test_loss, 100. * test_accuracy))
 
-    metrics = {
-        "default":test_accuracy,
-        # "test_loss":test_loss,
-    }
-    nni.report_intermediate_result(metrics)
+    if NNI_FLAG == True:
+        ######## collect the intermediate result for NNI ########
+        metrics = {
+            "default":test_accuracy,
+            # "test_loss":test_loss,
+        }
+        nni.report_intermediate_result(metrics)
+        ######## collect the intermediate result for NNI ########
 
     return test_accuracy
 
@@ -190,10 +196,19 @@ def backup_code(base_dir):
     net_name = 'simpleNet.py'
     shutil.copy('nets/' + net_name, code_path + '/' + net_name)
     shutil.copy(train_name, code_path + '/' + train_name)
-
+    
 if __name__ == '__main__':
+    NNI_FLAG = True # 是否使用NNI进行grid search实验，False为完全不使用
     args = parser.parse_args()
-    logging = logging.getLogger('NNI')
+    if NNI_FLAG == True:
+        logging = logging.getLogger('NNI')
+    else:
+        if not os.path.exists(args.base_dir):
+            os.makedirs(args.base_dir)
+        backup_code(args.base_dir)
+        log_path = os.path.join(args.base_dir, 'training.log') 
+        set_logging(log_path=log_path)
+
     """选择GPU ID"""
     gpu_list = [0] #[0,1]
     gpu_list_str = ','.join(map(str, gpu_list))
@@ -204,19 +219,23 @@ if __name__ == '__main__':
                  f'\tdevice name:{torch.cuda.get_device_name(0)}')
     
     try:
-        # get parameters form tuner
-        tuner_params = nni.get_next_parameter()
-        experiment_id = nni.get_experiment_id()
-        trial_id = nni.get_trial_id()
-        params = vars(merge_parameter(args, tuner_params))
-        del args
-        base_dir_init = params['base_dir'] + '-' + experiment_id
-        if not os.path.exists(base_dir_init):
-            os.makedirs(base_dir_init)
-        params['experiment_id'] = experiment_id
-        params['trial_id'] = trial_id
-        logging.info("NameSpace: {}".format(params))
-        args = params
+        if NNI_FLAG == True:
+            ######## get parameters form NNI tuner ########
+            tuner_params = nni.get_next_parameter()
+            experiment_id = nni.get_experiment_id()
+            trial_id = nni.get_trial_id()
+            params = vars(merge_parameter(args, tuner_params))
+            args = EasyDict(params)
+            base_dir_init = args.base_dir + '-' + experiment_id
+            if not os.path.exists(base_dir_init):
+                os.makedirs(base_dir_init)
+            args.experiment_id = experiment_id
+            args.trial_id = trial_id
+            args.save_threshold = 0.8
+            logging.info("NameSpace from NNI: {}".format(args))
+            ######## get parameters form NNI tuner ########
+        else:
+            logging.info(args)
         main(args)
     except Exception as exception:
         logging.exception(exception)
