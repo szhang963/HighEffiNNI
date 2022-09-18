@@ -113,8 +113,13 @@ def main(args):
             backup_code(base_dir)
 
             trial_id = args.trial_id
-            trial_log_path = os.path.join('RES_NNI_LOG',experiment_id,'trials',trial_id,'trial.log')
-            shutil.copy(trial_log_path, base_dir + '/' + 'trial.log')
+            trial_log_path = os.path.join('nni-experiments',experiment_id,'trials',trial_id,'trial.log')
+            if os.path.exists(trial_log_path) == False:
+                trial_log_path = os.path.join(os.path.expandvars('$HOME'), trial_log_path)
+            if os.path.exists(trial_log_path):
+                shutil.copy(trial_log_path, base_dir + '/' + 'trial.log')
+            else:
+                logging.error(f"file no found, please check the path {trial_log_path}")
         ######## collect the final result for NNI ########
 
 def train_mixed_precision(epoch, scaler, model, optimizer, train_loader, train_dataset):
