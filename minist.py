@@ -16,7 +16,7 @@ from utils.util import set_logging
 from nets.simpleNet import Net
 # Training settings
 parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
-parser.add_argument('--base_dir', type=str, default='res-train-minist',
+parser.add_argument('--base_dir', type=str, default='RES-train-minist',
                     help='location of the log path')
 parser.add_argument('--batch_size', type=int, default=512, metavar='N',
                     help='input batch size for training (default: 64)')
@@ -177,8 +177,8 @@ if __name__ == '__main__':
                  f'\tGPU ID is [{os.environ["CUDA_VISIBLE_DEVICES"]}],using {torch.cuda.device_count()} device\n'
                  f'\tdevice name:{torch.cuda.get_device_name(0)}')
 
-    logging.info(args)
     try:
+        logging.info(args)
         main(args)
     except Exception as exception:
         logging.exception(exception)
