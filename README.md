@@ -13,7 +13,8 @@ easydict >= 1.9
 ```
 ## News
 - In NNI 2.9, we can directly launch the visual website of NNI instead of configuring an ssh tunnel.
-- After using easydict lib, we can integrate the NNI's hyperparameter tuning in a simple and quick way.
+- After using easydict lib, we can integrate the NNI's hyperparameter tuning into your project in a simple and quick way. You can compare [nni_minist.py](https://github.com/szhang963/HighEffiNNI/blob/main/nni_minist.py) and [minist.py](https://github.com/szhang963/HighEffiNNI/blob/main/minist.py) to find these.
+
 ## config.yml
 A example of `config.yml` can be found in [here](https://github.com/szhang963/HighEffiNNI/blob/main/config.yml).
 More experiment config references can see [here](https://nni.readthedocs.io/en/stable/reference/experiment_config.html).
@@ -27,14 +28,11 @@ nnictl create --config config.yml -p 8140
 ```
 
 To watch the running of NNI, run this command:
-
 ```
 nnictl top 
 ```
 
-
 To stop the NNI, run this command:
-
 ```
 nnictl stop [--all] ([id])
 ```
