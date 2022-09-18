@@ -4,7 +4,8 @@ experimentName: RES-NNI-train-minist
 searchSpaceFile: search_space_batch.json
 trialCommand: python nni_minist.py
 trialCodeDirectory: . # 指定python代码路径
-experimentWorkingDirectory: ./RES_NNI_LOG # 日志
+experimentWorkingDirectory: ./nni-experiments # 需要先在当前目录手动新建该目录，用于备份该工程下的所有nni日志。注意名字不要改动，是为了与home目录下nni自动创建的保持一致。
+# experimentWorkingDirectory: ~/nni-experiments # 当出现这个错误时使用（train代码无需改动），不再备份到本地，而是home目录下，原因不详。Failed to establish a new connection: [Errno 111] Connection refused'))
 
 trialConcurrency: 2 #trail的并发数,根据GPU数量设置，此值为几就有几个train在同时跑
 trainingService:
