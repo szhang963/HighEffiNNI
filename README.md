@@ -8,29 +8,32 @@ To install requirements:
 
 ```setup
 PyTorch >= 1.6
-nni >= 2.8
+NNI >= 2.9
 easydict >= 1.9
 ```
+## News
+- In NNI 2.9, we can directly launch the visual website of NNI instead of configuring an ssh tunnel.
+- After using easydict lib, we can integrate the NNI's hyperparameter tuning in a simple and quick way.
 ## config.yml
-A example of `config.yml` can be found in this repo.
+A example of `config.yml` can be found in [here](https://github.com/szhang963/HighEffiNNI/blob/main/config.yml).
 More experiment config references can see [here](https://nni.readthedocs.io/en/stable/reference/experiment_config.html).
 
-## Running
+## Quick start
 
-To start up the nni, run this command:
+To start up the NNI, run this command:
 
 ```
 nnictl create --config config.yml -p 8140
 ```
 
-To watch the running of nni, run this command:
+To watch the running of NNI, run this command:
 
 ```
 nnictl top 
 ```
 
 
-To stop the nni, run this command:
+To stop the NNI, run this command:
 
 ```
 nnictl stop [--all] ([id])
