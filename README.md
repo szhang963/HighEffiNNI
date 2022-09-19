@@ -14,7 +14,7 @@ easydict >= 1.9
 ## News
 - In NNI 2.9, we can directly launch the visual website of NNI instead of configuring an ssh tunnel.
 - Now, we can integrate the NNI's hyperparameter tuning into your project in a simple and quick way. You can compare [nni_minist.py](https://github.com/szhang963/HighEffiNNI/blob/main/nni_minist.py) and [minist.py](https://github.com/szhang963/HighEffiNNI/blob/main/minist.py) to find these.
-- A solution about the error (Failed to establish a new connection) in 2.8 or 2.9 of NNI can be found in `[config.yml](https://github.com/szhang963/HighEffiNNI/blob/main/config.yml#L8)` 
+- A solution about the error (Failed to establish a new connection) in 2.8 or 2.9 of NNI can be found in [config.yml](https://github.com/szhang963/HighEffiNNI/blob/main/config.yml#L8).
 
 ## config.yml
 A example of `config.yml` can be found in [here](https://github.com/szhang963/HighEffiNNI/blob/main/config.yml).
